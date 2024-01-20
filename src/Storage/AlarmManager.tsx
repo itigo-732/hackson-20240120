@@ -1,11 +1,15 @@
 import storage from './Storage';
+import { Alert } from 'react-native';
 
-export const getAlarmList = () => {
-    storage.load({
+export const getAlarmNameList = () => {
+    return storage.load({
         key: "alarmList",
     }).then(data => {
         // 読み込み成功時処理
-        return data.data;
+//         Alert.alert(data);
+        return data;
+//         let nameList = JSON.parse(data);
+//         return nameList;
     }).catch(err => {
         // 読み込み失敗時処理
         return [];
@@ -13,24 +17,25 @@ export const getAlarmList = () => {
 }
 
 export const addAlarm = (name: string) => {
-    let alarm = {name};
-    let alarmListData = {"data": []};
-
-    alarmListData.data = getAlarmList();
-    alarmListData.data.push(alarm);
+    let alarmNameList = getAlarmNameList();
+    //Alert.alert(alarmNameList);
+    if(!alarmNameList) alarmNameList = '[]';
+    alarmNameList = JSON.parse(alarmNameList);
+//     if(!alarmNameList) alarmNameList = [];
+    alarmNameList.push(name);
     storage.save({
         key: "alarmList",
-        data: alarmListData,
+        data: JSON.stringify(alarmNameList),
     });
 }
 
 export const deleteAlarmByName = (name: string) => {
-    let alarmList = getAlarmList();
-    let newAlarmList = alarmList.filter(d => d.name !== name);
-
+    let alarmNameList = getAlarmNameList();
+    alarmNameList = JSON.parse(alarmNameList);
+    let newAlarmList = alarmNameList.filter(n => n != name);
     storage.save({
         key: "alarmList",
-        data: {"data": newAlarmList},
+        data: JSON.stringify(newAlarmList),
     });
 }
 
