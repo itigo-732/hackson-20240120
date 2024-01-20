@@ -6,8 +6,7 @@
  */
 
 import React, {useEffect, useState} from 'react';
-import {Button, Text, View} from 'react-native';
-
+import {Button, Text, TextInput, View} from 'react-native';
 
 const TIMER_LENGTH = {work: 1 * 60, break: 5 * 60} as const;
 type TIMER_LENGTH = (typeof TIMER_LENGTH)[keyof typeof TIMER_LENGTH];
@@ -18,6 +17,7 @@ interface State {
   timeLeft: number;
   isTimerOn: boolean;
   timerMode: Timer_mode;
+  initTime: number;
 }
 let timerCountInterval = 0;
 
@@ -50,6 +50,7 @@ const App = () => {
     timeLeft: TIMER_LENGTH.work,
     isTimerOn: false,
     timerMode: 'work',
+    initTime: 0,
   });
   useEffect(() => {
     return () => {
@@ -73,6 +74,11 @@ const App = () => {
       return {...state, isTimerOn: true};
     });
   };
+  const [test, setTest] = useState(0);
+  const [AddTest, setAddTest] = useState(0);
+  const onButtenClick2 = () => {
+    setAddTest(test);
+  };
   const timerCount = () => {
     setState(state => {
       if (state.timeLeft <= 0) {
@@ -92,6 +98,7 @@ const App = () => {
       timerMode: timerMode,
     };
   };
+
   return (
     <>
       <View>
@@ -101,6 +108,16 @@ const App = () => {
           onPress={onButtenClick}
         />
         <Text>{state.timerMode === 'work' ? '作業' : '休憩'}</Text>
+        <TextInput
+          keyboardType={"number-pad"}
+          onChangeText={(text) => {
+            console.log(text);
+            setTest(isNaN(text) ? text : text);
+          }}
+          style={{width: 200, height: 44, padding: 8}}
+        />
+        <Button title={'これ押してみて'} onPress={onButtenClick2} />
+        <Text>{AddTest}</Text>
       </View>
     </>
   );
