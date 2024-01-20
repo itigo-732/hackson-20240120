@@ -6,30 +6,34 @@
  */
 
 import React from 'react';
-import {View, TouchableNativeFeedback, Text, StyleSheet} from 'react-native';
+import { View, TouchableNativeFeedback, Text, StyleSheet } from 'react-native';
+import 'react-native-gesture-handler';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+import EditScreen from './src/EditScreen';
+import TimerList from './src/TimerList';
+
+const Stack = createStackNavigator();
 
 const Home = props => {
   return (
-    <View style={styles.container}>
-      <TouchableNativeFeedback>
-        <Text style={styles.text}>Press me</Text>
-      </TouchableNativeFeedback>
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator 
+        initialRouteName="TimerList" 
+        screenOptions={{headerShown: false}}
+      >
+        <Stack.Screen
+          name="TimerList"
+          component={TimerList}
+        />
+        <Stack.Screen
+          name="EditScreen"
+          component={EditScreen}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
 export default Home;
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-  },
-  text: {
-    borderWidth: 1,
-    padding: 25,
-    borderColor: 'red',
-    backgroundColor: 'yellow',
-    textDecorationColor: 'red',
-    color: 'red',
-  },
-});
