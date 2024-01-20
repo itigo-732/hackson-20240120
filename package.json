@@ -1,5 +1,5 @@
 {
-  "name": "Timer",
+  "name": "ReactTest8",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -10,8 +10,16 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-community/masked-view": "^0.1.11",
+    "@react-navigation/bottom-tabs": "^6.5.11",
+    "@react-navigation/native": "^6.1.9",
     "react": "18.2.0",
-    "react-native": "0.73.2"
+    "react-native": "0.73.2",
+    "react-native-gesture-handler": "^2.14.1",
+    "react-native-reanimated": "^3.6.1",
+    "react-native-safe-area-context": "^4.8.2",
+    "react-native-safe-area-view": "github:react-native-community/react-native-safe-area-view",
+    "react-native-screens": "^3.29.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -27,7 +35,6 @@
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
     "prettier": "2.8.8",
-    "react-native-elements": "^3.4.3",
     "react-test-renderer": "18.2.0",
     "typescript": "5.0.4"
   },
