@@ -1,3 +1,5 @@
+import { AlarmButton } from '../Alarm/AlarmButton';
+
 type jsonNodeType = {
     [key:string]: string | int | bool,
 }
@@ -12,6 +14,7 @@ type switchIndexListType = {
     toIndex: int,
 }
 
+// パースメソッド
 export const parseJson = (json: jsonObject): FlowChartNode[] => {
     let nodeList = json.nodes;
     let objList: FlowChartNode[] = [];
@@ -29,12 +32,16 @@ export class FlowChartNode{
     public type: string;
     public nextIndex: int;
     public nextNode: FlowChartNode;
+
     // standardTimer type attr
     public pausable: bool;
     public skippable: bool;
+    public awaitUntilStop: bool;
+
     // forLoop type attr
     public loopNumber: int;
     public loopIndexList: int[];
+
     // buttonSwitch type attr
     public switchIndexList: switchIndexListType;
     constructor(i: int, jsonNode: jsonNodeType) {
@@ -45,7 +52,16 @@ export class FlowChartNode{
         this.skippable = jsonNode.skippable;
         this.loopNumber = jsonNode.loopNumber;
         this.loopIndexList = jsonNode.loopIndexList;
-        this.switchIndexList = jsonNode.switchIndexList;
+        this.switchIndexList = [];
+        if('switchIndexList' in jsonNode){
+            let list = jsonNode.switchIndexList;
+            for(let i=0; list.length; i++){
+                let ab = new AlarmButton(i);
+                ab.name = list[i].name;
+                ab.color = list[i].color;
+                this.switchIndexList.push(ab);
+            }
+        }
     }
 
 
