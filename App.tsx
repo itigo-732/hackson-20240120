@@ -109,8 +109,8 @@ const App = () => {
         />
         <Text>{state.timerMode === 'work' ? '作業' : '休憩'}</Text>
         <TextInput
-          keyboardType={"number-pad"}
-          onChangeText={(text) => {
+          keyboardType={'number-pad'}
+          onChangeText={text => {
             console.log(text);
             setTest(isNaN(text) ? text : text);
           }}
