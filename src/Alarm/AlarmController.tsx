@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
     View,
@@ -25,20 +25,24 @@ type AlarmProp = PropsWithChildren<{
 }>;
 
 export const AlarmController = ({
+        onComplete,
+        onStart,
         children,
         duration,
         skippable,
         pausable,
         buttonList,
     }: AlarmProp) => {
-    let playState = true;
+
+    const [playState, setPlayState] = useState(true);
 
     const timeUpAlert = () => {
         Alert.alert('time up');
     }
 
     const togglePlayState = () => {
-        playState = !playState;
+        setPlayState(!playState);
+        Alert.alert('stop' + String(playState));
     }
 
     return (
@@ -51,6 +55,7 @@ export const AlarmController = ({
                 colors={["#004777", "#F7B801", "#A30000"]}
                 onComplete={() => {
                     timeUpAlert()
+                    if(onComplete) onComplete()
                     return [false, 10] // タイマーのループをするかどうか
                 }}
                 style={Styles.circleTimer}
@@ -108,9 +113,9 @@ export const AlarmController = ({
                     <Button
                         key="102"
                         style={Styles.button}
-                        title="タイマーを一時停止"
+                        title={playState ? "タイマーを一時停止" : "タイマーを再開"}
                         color="darkgreen"
-                        onClick={() => togglePlayState()}
+                        onPress={togglePlayState}
                         disabled={!pausable}
                     />
                     <Spacer size={15} />
