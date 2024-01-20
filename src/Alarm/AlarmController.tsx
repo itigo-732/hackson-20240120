@@ -24,7 +24,13 @@ type AlarmProp = PropsWithChildren<{
     buttonList: AlarmButton[],
 }>;
 
-export const AlarmView = ({children, duration, skippable, pausable, buttonList}: AlarmProp) => {
+export const AlarmController = ({
+        children,
+        duration,
+        skippable,
+        pausable,
+        buttonList,
+    }: AlarmProp) => {
     let playState = true;
 
     const timeUpAlert = () => {
