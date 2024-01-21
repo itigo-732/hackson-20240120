@@ -28,20 +28,35 @@ export const AlarmController = ({
         onComplete,
         onStart,
         children,
-        duration,
-        skippable,
-        pausable,
-        buttonList,
+        navigation,
+        buttonList = [],
     }: AlarmProp) => {
 
-    const [playState, setPlayState] = useState(true);
+    const [controlState, setControlState] = useState({
+        pausable: false,
+        skippable: false,
+    });
+    const [playerState, setPlayerState] = useState({
+        playing: true,
+        duration: 0,
+    });
 
     const timeUpAlert = () => {
         Alert.alert('time up');
     }
 
+    const onExit = () => {
+        navigation.navigate("TimerList");
+    }
+
+    const onButtonPress = (index: int) => {
+        Alert.alert(String(index))
+    }
+
     const togglePlayState = () => {
-        setPlayState(!playState);
+        let ps = playerState;
+        ps.playing = !ps.playing;
+        setPlayerState(ps);
         Alert.alert('stop' + String(playState));
     }
 
@@ -50,8 +65,8 @@ export const AlarmController = ({
         <Spacer size={50} />
         <View style={Styles.counter}>
             <CountdownCircleTimer
-                isPlaying={playState}
-                duration={duration}
+                isPlaying={playerState.playing}
+                duration={playerState.duration}
                 colors={["#004777", "#F7B801", "#A30000"]}
                 onComplete={() => {
                     timeUpAlert()
@@ -90,7 +105,7 @@ export const AlarmController = ({
                         key={button.index}
                         style={Styles.button}
                         title={button.name}
-                        onClick
+                        onPress={onButtonPress(button.index)}
                     />
                     <Spacer size={15} />
                 </View>
@@ -103,7 +118,7 @@ export const AlarmController = ({
                         title="タイマーをスキップ"
                         color="darkgreen"
                         onClick
-                        disabled={!skippable}
+                        disabled={!controlState.skippable}
                     />
                     <Spacer size={15} />
                 </View>
@@ -113,10 +128,10 @@ export const AlarmController = ({
                     <Button
                         key="102"
                         style={Styles.button}
-                        title={playState ? "タイマーを一時停止" : "タイマーを再開"}
+                        title={playerState.playing ? "タイマーを一時停止" : "タイマーを再開"}
                         color="darkgreen"
                         onPress={togglePlayState}
-                        disabled={!pausable}
+                        disabled={!controlState.pausable}
                     />
                     <Spacer size={15} />
                 </View>
@@ -127,7 +142,7 @@ export const AlarmController = ({
                     style={Styles.button}
                     title="終了する"
                     color="red"
-                    onClick
+                    onPress={() => onExit()}
                 />
                 <Spacer size={30} />
             </View>
@@ -135,3 +150,5 @@ export const AlarmController = ({
         </View>
     );
 };
+
+export default AlarmController;

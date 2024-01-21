@@ -1,12 +1,74 @@
-import React from 'react';
-import { View, StyleSheet, Text, SafeAreaView, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    StyleSheet,
+    Text,
+    SafeAreaView,
+    FlatList,
+    Alert,
+    ScrollView,
+} from 'react-native';
+import DialogInput from 'react-native-dialog-input';
 import { Image } from 'react-native-elements';
 import { Header as HeaderRNE, HeaderProps, Icon } from '@rneui/themed';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import storage from './Storage/Storage';
+import { addTimer, deleteTimerList } from './Storage/AlarmManager';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const TimerNameList = ["name0","name1","name2","name3","name4","name5","name6","name7","name8","name9","name10","name11","name12","name13","name14","name15",];
+// deleteTimerList();
 
 const TimerList = props => {
+    const [TimerNameList, setTimerNameList] = useState(false);
+    const [dialogState, setDialogState] = useState(false);
+
+    const onAddTimer = async () => {
+        setDialogState(true);
+    };
+
+    const onEditTimer = (item) => {
+        props.navigation.navigate('EditScreen', {message: item});
+    }
+
+    const onExecTimer = (item) => {
+        props.navigation.navigate('AlarmScreen', {message: item});
+    }
+
+    const sendAddInput = async (text: string) => {
+        if(TimerNameList.includes(text)) {
+            Alert.alert(text + "は既に使われています。\n別の名前にしてください。");
+            return;
+        }
+        setDialogState(false);
+        await addTimer(text);
+        await updateState();
+    }
+
+    const closeDialog = () => {
+        setDialogState(false);
+//         Alert.alert("close");
+    }
+
+    const updateState = async () => {
+        await storage.load({
+            key: 'TimerNameList'
+        }).then(raw => {
+            if(raw) {
+                let list = JSON.parse(raw);
+                console.log(raw);
+                setTimerNameList(list.data);
+            } else {
+                setTimerNameList([]);
+            }
+        }).catch(e => {
+            setTimerNameList([]);
+        });
+    };
+    useEffect(() => {
+        if(!TimerNameList)
+            updateState();
+    }, [TimerNameList, dialogState]);
+
     return (
         <SafeAreaView style={styles.container}>
             <HeaderRNE
@@ -18,7 +80,7 @@ const TimerList = props => {
                         /*-------------------------------------------------------------------------------------------------------
                         タイマー新規作成の処理を書く
                         -------------------------------------------------------------------------------------------------------*/
-                        onPress={() => props.navigation.navigate('TimerList')}>
+                        onPress={() => onAddTimer()}>
                         
                         <Image
                             style={styles.headerIcon}
@@ -27,7 +89,6 @@ const TimerList = props => {
                     </TouchableOpacity>
                 }
             />
-            
             <FlatList
                 style={styles.flatList}
 
@@ -43,7 +104,7 @@ const TimerList = props => {
                             <Text style={styles.timerTitle}>{item}</Text>
                             <View style={styles.listIcons}>
                                 <TouchableOpacity
-                                    onPress={() => props.navigation.navigate('EditScreen',{message:item})}>
+                                    onPress={() => onEditTimer(item)}>
                                     <Image
                                         style={styles.listIconImg}
                                         source={require('../img/EditIcon.png')}
@@ -54,7 +115,7 @@ const TimerList = props => {
                                     /*-------------------------------------------------------------------------------------------------------
                                     タイマースタートの処理を書く
                                     -------------------------------------------------------------------------------------------------------*/
-                                    onPress={() => props.navigation.navigate('TimerList')}>
+                                    onPress={() => onExecTimer(item)}>
                                     <Image
                                         style={styles.listIconImg}
                                         source={require('../img/PlayIcon.png')}
@@ -65,6 +126,13 @@ const TimerList = props => {
                     );
                 }}
             />
+            <DialogInput isDialogVisible={dialogState}
+                        title={"新規作成"}
+                        message={"タイマーの名前を入力してください。"}
+                        hintInput ={"タイマー名"}
+                        submitInput={ (inputText) => {sendAddInput(inputText)} }
+                        closeDialog={ () => closeDialog() }>
+            </DialogInput>
         </SafeAreaView>
     );
 };
