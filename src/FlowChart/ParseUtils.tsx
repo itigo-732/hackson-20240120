@@ -44,6 +44,7 @@ export class FlowChartNode{
 
     // buttonSwitch type attr
     public switchIndexList: switchIndexListType;
+
     constructor(i: int, jsonNode: jsonNodeType) {
         this.index = i;
         this.type = jsonNode.type;

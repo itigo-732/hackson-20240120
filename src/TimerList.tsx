@@ -16,7 +16,8 @@ import storage from './Storage/Storage';
 import { addTimer, deleteTimerList } from './Storage/AlarmManager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// deleteTimerList();
+// データをリセットする場合は↓の行をコメントアウト
+// AsyncStorage.removeItem('TimerNameList');
 
 const TimerList = props => {
     const [TimerNameList, setTimerNameList] = useState(false);

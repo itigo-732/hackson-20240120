@@ -36,10 +36,13 @@ export const AlarmController = ({
         pausable: false,
         skippable: false,
     });
+
     const [playerState, setPlayerState] = useState({
         playing: true,
         duration: 0,
     });
+
+    const [nodeState, setNodeState] = useState({});
 
     const timeUpAlert = () => {
         Alert.alert('time up');

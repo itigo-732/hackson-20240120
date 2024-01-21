@@ -1,27 +1,36 @@
 import storage from './Storage';
 
 export const addTimer = async (name: string) => {
-   await storage.load({
-       key: 'TimerNameList'
-   }).then(async raw => {
-       let json = raw ? JSON.parse(raw) : {data: []};
-       if(!(name in json.data))
-           json.data.push(name);
-       await storage.save({
-           key: 'TimerNameList',
-           data: JSON.stringify(json),
-       });
-   });
+    try {
+        await storage.load({
+            key: 'TimerNameList'
+        }).then(async raw => {
+            let json = raw ? JSON.parse(raw) : {data: []};
+            if(!(name in json.data))
+                json.data.push(name);
+            await storage.save({
+                key: 'TimerNameList',
+                data: JSON.stringify(json),
+            });
+        });
+    } catch {
+        await deleteTimerList();
+        await addTimer(name);
+    }
 };
 
 // do not use
 export const getTimerList = async () => {
-   await storage.load({
-       key: 'TimerNameList'
-   }).then(async raw => {
-       let json = raw ? JSON.parse(raw) : {data: []};
-       return json.data;
-   });
+    try {
+        await storage.load({
+            key: 'TimerNameList'
+        }).then(async raw => {
+            let json = raw ? JSON.parse(raw) : {data: []};
+            return json.data;
+        });
+    } catch {
+        return [];
+    }
 };
 
 export const deleteTimerList = async () => {
