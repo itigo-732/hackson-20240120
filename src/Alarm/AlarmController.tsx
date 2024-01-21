@@ -31,13 +31,18 @@ export const AlarmController = ({
         duration,
         skippable,
         pausable,
-        buttonList,
+        navigation,
+        buttonList = [],
     }: AlarmProp) => {
 
     const [playState, setPlayState] = useState(true);
 
     const timeUpAlert = () => {
         Alert.alert('time up');
+    }
+
+    const onExit = () => {
+        navigation.navigate("TimerList");
     }
 
     const togglePlayState = () => {
@@ -127,7 +132,7 @@ export const AlarmController = ({
                     style={Styles.button}
                     title="終了する"
                     color="red"
-                    onClick
+                    onPress={() => onExit()}
                 />
                 <Spacer size={30} />
             </View>
@@ -135,3 +140,5 @@ export const AlarmController = ({
         </View>
     );
 };
+
+export default AlarmController;

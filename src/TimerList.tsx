@@ -18,10 +18,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const TimerList = props => {
     const [TimerNameList, setTimerNameList] = useState();
 
-    const addTimerEvent = async () => {
+    const onAddTimer = async () => {
         await addTimer("test" + String(Math.floor(Math.random() * 10000)));
         await updateState();
     };
+
+    const onEditTimer = (item) => {
+        props.navigation.navigate('EditScreen', {message: item});
+    }
+
+    const onExecTimer = (item) => {
+        props.navigation.navigate('AlarmScreen', {message: item});
+    }
 
     const updateState = async () => {
         await storage.load({
@@ -54,7 +62,7 @@ const TimerList = props => {
                         /*-------------------------------------------------------------------------------------------------------
                         タイマー新規作成の処理を書く
                         -------------------------------------------------------------------------------------------------------*/
-                        onPress={() => addTimerEvent()}>
+                        onPress={() => onAddTimer()}>
                         
                         <Image
                             style={styles.headerIcon}
@@ -78,7 +86,7 @@ const TimerList = props => {
                             <Text style={styles.timerTitle}>{item}</Text>
                             <View style={styles.listIcons}>
                                 <TouchableOpacity
-                                    onPress={() => props.navigation.navigate('EditScreen',{message:item})}>
+                                    onPress={() => onEditTimer(item)}>
                                     <Image
                                         style={styles.listIconImg}
                                         source={require('../img/EditIcon.png')}
@@ -89,7 +97,7 @@ const TimerList = props => {
                                     /*-------------------------------------------------------------------------------------------------------
                                     タイマースタートの処理を書く
                                     -------------------------------------------------------------------------------------------------------*/
-                                    onPress={() => props.navigation.navigate('TimerList')}>
+                                    onPress={() => onExecTimer(item)}>
                                     <Image
                                         style={styles.listIconImg}
                                         source={require('../img/PlayIcon.png')}
