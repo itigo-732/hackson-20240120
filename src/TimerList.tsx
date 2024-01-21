@@ -1,12 +1,48 @@
-import React from 'react';
-import { View, StyleSheet, Text, SafeAreaView, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    StyleSheet,
+    Text,
+    SafeAreaView,
+    FlatList,
+    Alert,
+    ScrollView,
+} from 'react-native';
 import { Image } from 'react-native-elements';
 import { Header as HeaderRNE, HeaderProps, Icon } from '@rneui/themed';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-
-const TimerNameList = ["name0","name1","name2","name3","name4","name5","name6","name7","name8","name9","name10","name11","name12","name13","name14","name15",];
+import storage from './Storage/Storage';
+import { addTimer, getTimerList } from './Storage/AlarmManager';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const TimerList = props => {
+    const [TimerNameList, setTimerNameList] = useState();
+
+    const addTimerEvent = async () => {
+        await addTimer("test" + String(Math.floor(Math.random() * 10000)));
+        await updateState();
+    };
+
+    const updateState = async () => {
+        await storage.load({
+            key: 'TimerNameList'
+        }).then(raw => {
+            if(raw) {
+                let list = JSON.parse(raw);
+                console.log(raw);
+                setTimerNameList(list.data);
+            } else {
+                setTimerNameList([]);
+            }
+        }).catch(e => {
+            Alert.alert(String(e));
+        });
+    };
+    useEffect(() => {
+        if(!TimerNameList)
+            updateState();
+    }, [TimerNameList]);
+
     return (
         <SafeAreaView style={styles.container}>
             <HeaderRNE
@@ -18,7 +54,7 @@ const TimerList = props => {
                         /*-------------------------------------------------------------------------------------------------------
                         タイマー新規作成の処理を書く
                         -------------------------------------------------------------------------------------------------------*/
-                        onPress={() => props.navigation.navigate('TimerList')}>
+                        onPress={() => addTimerEvent()}>
                         
                         <Image
                             style={styles.headerIcon}
@@ -27,7 +63,6 @@ const TimerList = props => {
                     </TouchableOpacity>
                 }
             />
-            
             <FlatList
                 style={styles.flatList}
 
