@@ -8,19 +8,22 @@ import {
     Alert,
     ScrollView,
 } from 'react-native';
+import DialogInput from 'react-native-dialog-input';
 import { Image } from 'react-native-elements';
 import { Header as HeaderRNE, HeaderProps, Icon } from '@rneui/themed';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import storage from './Storage/Storage';
-import { addTimer, getTimerList } from './Storage/AlarmManager';
+import { addTimer, deleteTimerList } from './Storage/AlarmManager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// deleteTimerList();
+
 const TimerList = props => {
-    const [TimerNameList, setTimerNameList] = useState();
+    const [TimerNameList, setTimerNameList] = useState(false);
+    const [dialogState, setDialogState] = useState(false);
 
     const onAddTimer = async () => {
-        await addTimer("test" + String(Math.floor(Math.random() * 10000)));
-        await updateState();
+        setDialogState(true);
     };
 
     const onEditTimer = (item) => {
@@ -29,6 +32,21 @@ const TimerList = props => {
 
     const onExecTimer = (item) => {
         props.navigation.navigate('AlarmScreen', {message: item});
+    }
+
+    const sendAddInput = async (text: string) => {
+        if(TimerNameList.includes(text)) {
+            Alert.alert(text + "は既に使われています。\n別の名前にしてください。");
+            return;
+        }
+        setDialogState(false);
+        await addTimer(text);
+        await updateState();
+    }
+
+    const closeDialog = () => {
+        setDialogState(false);
+//         Alert.alert("close");
     }
 
     const updateState = async () => {
@@ -43,13 +61,13 @@ const TimerList = props => {
                 setTimerNameList([]);
             }
         }).catch(e => {
-            Alert.alert(String(e));
+            setTimerNameList([]);
         });
     };
     useEffect(() => {
         if(!TimerNameList)
             updateState();
-    }, [TimerNameList]);
+    }, [TimerNameList, dialogState]);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -108,6 +126,13 @@ const TimerList = props => {
                     );
                 }}
             />
+            <DialogInput isDialogVisible={dialogState}
+                        title={"新規作成"}
+                        message={"タイマーの名前を入力してください。"}
+                        hintInput ={"タイマー名"}
+                        submitInput={ (inputText) => {sendAddInput(inputText)} }
+                        closeDialog={ () => closeDialog() }>
+            </DialogInput>
         </SafeAreaView>
     );
 };

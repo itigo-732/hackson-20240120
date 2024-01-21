@@ -24,6 +24,14 @@ export const getTimerList = async () => {
    });
 };
 
+export const deleteTimerList = async () => {
+   let json = {data: []};
+   await storage.save({
+       key: 'TimerNameList',
+       data: JSON.stringify(json),
+   });
+}
+
 export const deleteTimer = async (name: string) => {
    await storage.load({
        key: 'TimerNameList'
