@@ -115,9 +115,8 @@ export const AlarmController = ({
                 duration={playerState.duration}
                 colors={["#004777", "#F7B801", "#A30000"]}
                 onComplete={() => {
-                    timeUpAlert()
-                    if(onComplete) onComplete()
-                    return [false, 10] // タイマーのループをするかどうか
+                    timeUpAlert();
+                    return [false, 10]; // タイマーのループをするかどうか
                 }}
                 style={Styles.circleTimer}
                 size={300}
