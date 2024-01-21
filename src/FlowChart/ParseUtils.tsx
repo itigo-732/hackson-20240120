@@ -56,7 +56,7 @@ export class FlowChartNode{
         this.switchIndexList = [];
         if('switchIndexList' in jsonNode){
             let list = jsonNode.switchIndexList;
-            for(let i=0; list.length; i++){
+            for(let i=0; i<list.length; i++){
                 let ab = new AlarmButton(i);
                 ab.name = list[i].name;
                 ab.color = list[i].color;

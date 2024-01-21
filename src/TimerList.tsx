@@ -32,7 +32,7 @@ const TimerList = props => {
     }
 
     const onExecTimer = (item) => {
-        props.navigation.navigate('AlarmScreen', {message: item});
+        props.navigation.navigate('AlarmScreen', {timerName: item});
     }
 
     const sendAddInput = async (text: string) => {

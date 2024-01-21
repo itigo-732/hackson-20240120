@@ -1,4 +1,12 @@
 import storage from './Storage';
+const dummyJson = {"nodes": [
+{"type": "standardTimer", "time": 300, "awaitUntilStop": true,"pausable": true, "skippable": true, "nextIndex": 1 },
+{"type": "forLoop", "loopNumber": 5, "loopIndexList": [3, 4], "nextIndex": 5 },
+{"type": "buttonSwitch", "switchIndexList": [{"name":"赤", "color":"red", "toIndex":3},{"name":"青", "color":"blue", "toIndex": 4}]},
+{"type": "dummyNode", "nextIndex": 4},
+{"type": "dummyNode", "nextIndex": 5},
+{"type": "endNode" }
+]};
 
 export const addTimer = async (name: string) => {
     try {
@@ -56,15 +64,21 @@ export const deleteTimer = async (name: string) => {
 };
 
 export const loadTimerLogic = async (name: string) => {
-   await storage.load({
-       key: 'TimerLogic_' + name
-   }).then(async raw => {
-       let json = raw ? JSON.parse(raw) : { name };
-       return json
-   });
+    try {
+        return await storage.load({
+            key: 'TimerLogic_' + name
+        }).then(async raw => {
+            console.log(raw);
+            let json = JSON.parse(raw);
+            return json;
+        });
+    } catch {
+        return [];
+    }
 };
 
 export const saveTimerLogic = async (name: string, json: JSON) => {
+console.log(JSON.stringify(json));
    await storage.save({
        key: 'TimerLogic_' + name,
        data: JSON.stringify(json),

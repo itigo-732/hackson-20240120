@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
     View,
@@ -12,10 +12,13 @@ import {
 
 import Constants from 'expo-constants';
 import { CountdownCircleTimer } from 'react-native-countdown-circle-timer';
+import { loadTimerLogic, saveTimerLogic } from '../Storage/AlarmManager';
 
 import { AlarmButton } from './AlarmButton';
 import { Spacer } from './Spacer';
 import { Styles } from './Styles';
+
+import { dummyJson } from '../FlowChart/Test';
 
 type AlarmProp = PropsWithChildren<{
     duration: int,
@@ -25,24 +28,25 @@ type AlarmProp = PropsWithChildren<{
 }>;
 
 export const AlarmController = ({
-        onComplete,
-        onStart,
         children,
         navigation,
+        route,
         buttonList = [],
     }: AlarmProp) => {
 
     const [controlState, setControlState] = useState({
-        pausable: false,
-        skippable: false,
+        pausable: true,
+        skippable: true,
     });
 
     const [playerState, setPlayerState] = useState({
         playing: true,
-        duration: 0,
+        duration: 30,
     });
 
-    const [nodeState, setNodeState] = useState({});
+    const [nodeList, setNodeList] = useState([]);
+
+    const [nodeState, setNodeState] = useState();
 
     const timeUpAlert = () => {
         Alert.alert('time up');
@@ -52,21 +56,60 @@ export const AlarmController = ({
         navigation.navigate("TimerList");
     }
 
-    const onButtonPress = (index: int) => {
+    const onNodeButtonPress = (index: int) => {
         Alert.alert(String(index))
     }
 
-    const togglePlayState = () => {
-        let ps = playerState;
-        ps.playing = !ps.playing;
-        setPlayerState(ps);
-        Alert.alert('stop' + String(playState));
+    const testMethod = () => {
+//         Alert.alert("test: " + JSON.stringify(nodeList));
+        console.log(JSON.stringify(nodeList));
     }
+
+    const togglePlayState = () => {
+        let ps = {
+            duration: playerState.duration,
+            playing: !playerState.playing,
+        };
+        setPlayerState(ps);
+    }
+
+    const initialize = async () => {
+        console.log(JSON.stringify(dummyJson.nodes));
+        await saveTimerLogic(route.params.timerName, dummyJson.nodes);
+
+        let data = await loadTimerLogic(route.params.timerName);
+        console.log(data);
+        setNodeList(data);
+        if(nodeList.length > 0)
+            setNodeState(nodeList[1]);
+    }
+
+    const forward = () => {
+        if(!nodeState)
+            return;
+        console.log(nodeState.index);
+        if(nodeState.type == "endNode")
+            return;
+        setNodeState(nodeState.nextNode);
+    }
+
+    // 初期化時
+    useEffect(() => {
+        //initialize();
+    }, []);
+
+    useEffect(() => {
+        forward();
+    }, [nodeState]);
 
     return (
         <View style={Styles.container} >
         <Spacer size={50} />
         <View style={Styles.counter}>
+            <Text style={Styles.timerName}>
+                {route.params.timerName}
+            </Text>
+            <Spacer size={14} />
             <CountdownCircleTimer
                 isPlaying={playerState.playing}
                 duration={playerState.duration}
@@ -108,7 +151,7 @@ export const AlarmController = ({
                         key={button.index}
                         style={Styles.button}
                         title={button.name}
-                        onPress={onButtonPress(button.index)}
+                        onPress={onNodeButtonPress(button.index)}
                     />
                     <Spacer size={15} />
                 </View>
@@ -120,8 +163,8 @@ export const AlarmController = ({
                         style={Styles.button}
                         title="タイマーをスキップ"
                         color="darkgreen"
-                        onClick
-                        disabled={!controlState.skippable}
+                        onPress={testMethod}
+//                         disabled={!controlState.skippable}
                     />
                     <Spacer size={15} />
                 </View>

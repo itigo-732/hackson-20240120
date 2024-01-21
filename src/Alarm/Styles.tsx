@@ -8,6 +8,11 @@ export const Styles = StyleSheet.create({
         marginHorizontal: 16,
     },
 
+    timerName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+
     // counter
     counter: {
         flex: 3,
