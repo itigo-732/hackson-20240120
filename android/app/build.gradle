@@ -73,7 +73,7 @@ android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
-
+    viewBinding { enabled = true}
     namespace "com.timer"
     defaultConfig {
         applicationId "com.timer"
@@ -103,7 +103,16 @@ android {
         }
     }
 }
+ext {
+    googlePlayServicesVersion = "+"
+    firebaseMessagingVersion = "21.1.0"
 
+    // Other settings
+    compileSdkVersion = 23
+    buildToolsVersion = "23.0.1"
+    targetSdkVersion = 23
+     supportLibVersion = "23.1.1"
+}
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
