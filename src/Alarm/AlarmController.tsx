@@ -19,6 +19,14 @@ import { Spacer } from './Spacer';
 import { Styles } from './Styles';
 
 import { dummyJson } from '../FlowChart/Test';
+import {
+    StandardTimer,
+    ForLoop,
+    ButtonSwitch,
+    DummyNode,
+    EndNode,
+    dj2,
+} from '../FlowChart/Node';
 
 type AlarmProp = PropsWithChildren<{
     duration: int,
@@ -34,6 +42,7 @@ export const AlarmController = ({
         buttonList = [],
     }: AlarmProp) => {
 
+    // state object
     const [controlState, setControlState] = useState({
         pausable: true,
         skippable: true,
@@ -41,63 +50,123 @@ export const AlarmController = ({
 
     const [playerState, setPlayerState] = useState({
         playing: true,
-        duration: 30,
+        duration: 10,
     });
 
-    const [nodeList, setNodeList] = useState([]);
+    let onTimerComplete = () => {};
+    let initialized = false;
 
+    const [nodeList, setNodeList] = useState([]);
     const [nodeState, setNodeState] = useState();
 
+    const [clockKey, setClockKey] = useState(0);
+
+    // trigger function
+    // タイマー終了時のアラート
     const timeUpAlert = () => {
-        Alert.alert('time up');
+//         Alert.alert('time up');
     }
 
+    const onEndTimer = () => {
+        // タイマー終了処理
+        timeUpAlert();
+        setClockKey(clockKey + 1);
+        setTimer(0, false);
+
+        // コールバック呼び出し
+        onTimerComplete();
+        return [true, 0]; // タイマーのループをするかどうか
+    }
+
+    // 終了ボタンが押されたとき
     const onExit = () => {
         navigation.navigate("TimerList");
     }
 
+    // ユーザ定義のボタンが押されたとき
     const onNodeButtonPress = (index: int) => {
         Alert.alert(String(index))
     }
 
+    // テスト用
     const testMethod = () => {
 //         Alert.alert("test: " + JSON.stringify(nodeList));
         console.log(JSON.stringify(nodeList));
     }
 
+    // 再生・一時停止トグルボタン
     const togglePlayState = () => {
-        let ps = {
-            duration: playerState.duration,
-            playing: !playerState.playing,
-        };
-        setPlayerState(ps);
+        setTimer(playerState.duration, !playerState.playing);
     }
 
-    const initialize = async () => {
-        console.log(JSON.stringify(dummyJson.nodes));
-        await saveTimerLogic(route.params.timerName, dummyJson.nodes);
+    // タイマーセット
+    const setTimer = (duration: int, playing: bool = true) => {
+        setPlayerState({duration, playing});
+    }
 
+    // 画面初期化時
+    const initialize = async () => {
+        saveTimerLogic(route.params.timerName, dj2);
         let data = await loadTimerLogic(route.params.timerName);
-        console.log(data);
         setNodeList(data);
         if(nodeList.length > 0)
-            setNodeState(nodeList[1]);
+            setNodeState(nodeList[0]);
+        console.log('[App] nodeList loaded: ' + JSON.stringify(nodeList));
     }
 
-    const forward = () => {
+    // forward step
+    const forward = async () => {
+        await 
+
+        console.log('[App] node forward: ' + JSON.stringify(nodeState));
+        // nodeState未設定時
         if(!nodeState)
             return;
-        console.log(nodeState.index);
+
+        // endNode
         if(nodeState.type == "endNode")
             return;
-        setNodeState(nodeState.nextNode);
+
+        // standardTimer
+        if(nodeState.type == "standardTimer") {
+            onTimerComplete = () => setNodeState(nodeList[nodeState.nextIndex]);
+            setTimer(nodeState.duration, true);
+            return;
+        }
+
+        // forLoop
+        if(nodeState.type == "forLoop") {
+            let count = nodeList[nodeState.index].count;
+            if(!count)
+                count = 0;
+            if(count < nodeState.loopNumber) {
+                console.log('[App] loop count: ' + (count + 1))
+                nodeList[nodeState.index].count = count + 1;
+                setNodeState(nodeList[nodeState.loopStartIndex]);
+                return;
+            }
+            console.log('[App] loop finished')
+        }
+
+        // buttonSwitch
+        if(nodeState.type == "buttonSwitch") {
+            let bList = nodeState.switchIndexList;
+            for(let i=0; i<bList.length; i++) {
+
+            }
+        }
+
+        // forward node
+        setNodeState(nodeList[nodeState.nextIndex]);
     }
 
     // 初期化時
     useEffect(() => {
-        //initialize();
+        console.log('[App] nodeList initialized');
+        initialize();
     }, []);
 
+    // nodeState変更時
     useEffect(() => {
         forward();
     }, [nodeState]);
@@ -111,13 +180,11 @@ export const AlarmController = ({
             </Text>
             <Spacer size={14} />
             <CountdownCircleTimer
+                key={clockKey}
                 isPlaying={playerState.playing}
                 duration={playerState.duration}
                 colors={["#004777", "#F7B801", "#A30000"]}
-                onComplete={() => {
-                    timeUpAlert();
-                    return [false, 10]; // タイマーのループをするかどうか
-                }}
+                onComplete={() => onEndTimer() }
                 style={Styles.circleTimer}
                 size={300}
             >

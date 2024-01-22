@@ -66,9 +66,8 @@ export const deleteTimer = async (name: string) => {
 export const loadTimerLogic = async (name: string) => {
     try {
         return await storage.load({
-            key: 'TimerLogic_' + name
+            key: 'TimerLogic-' + name
         }).then(async raw => {
-            console.log(raw);
             let json = JSON.parse(raw);
             return json;
         });
@@ -78,9 +77,8 @@ export const loadTimerLogic = async (name: string) => {
 };
 
 export const saveTimerLogic = async (name: string, json: JSON) => {
-console.log(JSON.stringify(json));
    await storage.save({
-       key: 'TimerLogic_' + name,
+       key: 'TimerLogic-' + name,
        data: JSON.stringify(json),
    });
 };

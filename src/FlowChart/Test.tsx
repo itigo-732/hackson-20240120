@@ -15,7 +15,7 @@ import {
     parseJson,
     FlowChartNode,
 } from './ParseUtils';
-
+import { AlarmButton } from '../Alarm/AlarmButton';
 
 // parseJson()にjsonを渡してパースします
 let res: FlowChartNode[] = parseJson(dummyJson);
@@ -31,3 +31,4 @@ Alert.alert(String(firstButton.name + "-> color:" + firstButton.color));
 // res[0].type
 //       .nextIndex
 //       .nextNode
+
