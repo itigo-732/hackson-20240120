@@ -22,11 +22,13 @@ import { dummyJson } from '../FlowChart/Test';
 import {
     StandardTimer,
     ForLoop,
-    ButtonSwitch,
+    ButtonSwitchNode,
     DummyNode,
     EndNode,
-    dj2,
+    UserButtonNode,
+    dj3,
 } from '../FlowChart/Node';
+import { parseLines } from '../FlowChart/ParseUtils';
 
 type AlarmProp = PropsWithChildren<{
     duration: int,
@@ -39,7 +41,6 @@ export const AlarmController = ({
         children,
         navigation,
         route,
-        buttonList = [],
     }: AlarmProp) => {
 
     // state object
@@ -49,17 +50,29 @@ export const AlarmController = ({
     });
 
     const [playerState, setPlayerState] = useState({
-        playing: true,
-        duration: 10,
+        playing: false,
+        duration: 2,
     });
 
     let onTimerComplete = () => {};
-    let initialized = false;
+//    const [initialized, setInitialized] = useState(false);
+    // 初期化完了までロック
+    const [nodeMutex, setNodeMutex] = useState(true);
+    const sleep = msec => new Promise(r => setTimeout(r, msec));
+//    const awaitUntilInit = () => new Promise(async (resolve) => {
+//        while(!initialized) {
+//            console.log('init now...' + String(initialized));
+//            await sleep(100);
+//        }
+//        resolve();
+//    });
+
 
     const [nodeList, setNodeList] = useState([]);
     const [nodeState, setNodeState] = useState();
 
     const [clockKey, setClockKey] = useState(0);
+    const [buttonList, setButtonList] = useState([]);
 
     // trigger function
     // タイマー終了時のアラート
@@ -68,13 +81,18 @@ export const AlarmController = ({
     }
 
     const onEndTimer = () => {
+        console.log('[App] Timer end')
         // タイマー終了処理
+        // duration=0で常にタイマーを起動可能な状態にしておく
         timeUpAlert();
         setClockKey(clockKey + 1);
         setTimer(0, false);
 
+        // forward()を呼び出し
+        setNodeState(nodeList[nodeState.nextIndex]);
+        setNodeMutex(false);
         // コールバック呼び出し
-        onTimerComplete();
+//        onTimerComplete();
         return [true, 0]; // タイマーのループをするかどうか
     }
 
@@ -84,20 +102,24 @@ export const AlarmController = ({
     }
 
     // ユーザ定義のボタンが押されたとき
-    const onNodeButtonPress = (index: int) => {
-        Alert.alert(String(index))
+    const onNodeButtonPress = (nextNode: int) => {
+//        Alert.alert(String(index))
+//        console.log(nodeState);
+//        let nextNodeIndex = nodeState.switchIndexList[index].nextIndex;
+        setButtonList([]);
+        setNodeState(nextNode);
+        setNodeMutex(false);
     }
 
     // テスト用
     const testMethod = () => {
 //         Alert.alert("test: " + JSON.stringify(nodeList));
-        console.log(JSON.stringify(nodeList));
+//        console.log('[App] test parser: ' + JSON.stringify(parseLines("timer duration=12 autoStep\ntimer duration=30 nextIndex=12")));
+//        console.log(JSON.stringify(nodeList));
+        setNodeMutex(false);
+        setNodeState(nodeList[0]);
     }
 
-    // 再生・一時停止トグルボタン
-    const togglePlayState = () => {
-        setTimer(playerState.duration, !playerState.playing);
-    }
 
     // タイマーセット
     const setTimer = (duration: int, playing: bool = true) => {
@@ -106,17 +128,24 @@ export const AlarmController = ({
 
     // 画面初期化時
     const initialize = async () => {
-        saveTimerLogic(route.params.timerName, dj2);
+        await saveTimerLogic(route.params.timerName, dj3);
         let data = await loadTimerLogic(route.params.timerName);
         setNodeList(data);
         if(nodeList.length > 0)
             setNodeState(nodeList[0]);
+//        console.log(JSON.stringify(data));
         console.log('[App] nodeList loaded: ' + JSON.stringify(nodeList));
+        setNodeMutex(false);
+        forward();
     }
 
     // forward step
-    const forward = async () => {
-        await 
+    const forward = () => {
+//        await awaitUntilInit();
+//        console.log('[App] init end');
+        // Mutex設定時
+        if(nodeMutex)
+            return;
 
         console.log('[App] node forward: ' + JSON.stringify(nodeState));
         // nodeState未設定時
@@ -124,13 +153,16 @@ export const AlarmController = ({
             return;
 
         // endNode
-        if(nodeState.type == "endNode")
+        if(nodeState.type == "endNode") {
+            setNodeMutex(true);
             return;
+        }
 
         // standardTimer
         if(nodeState.type == "standardTimer") {
-            onTimerComplete = () => setNodeState(nodeList[nodeState.nextIndex]);
+            // タイマーをセットして開始
             setTimer(nodeState.duration, true);
+            setNodeMutex(true);
             return;
         }
 
@@ -145,15 +177,20 @@ export const AlarmController = ({
                 setNodeState(nodeList[nodeState.loopStartIndex]);
                 return;
             }
-            console.log('[App] loop finished')
+            console.log('[App] loop finished');
         }
 
-        // buttonSwitch
-        if(nodeState.type == "buttonSwitch") {
-            let bList = nodeState.switchIndexList;
-            for(let i=0; i<bList.length; i++) {
-
+        // ButtonSwitchNode
+        if(nodeState.type == "ButtonSwitchNode") {
+            let bList = [];
+            console.log(nodeState);
+            for(let i=0; i<nodeState.switchIndexList.length; i++) {
+                bList.push(nodeList[nodeState.switchIndexList[i]]);
             }
+            console.log(bList);
+            setButtonList(bList);
+            setNodeMutex(true);
+            return;
         }
 
         // forward node
@@ -184,7 +221,7 @@ export const AlarmController = ({
                 isPlaying={playerState.playing}
                 duration={playerState.duration}
                 colors={["#004777", "#F7B801", "#A30000"]}
-                onComplete={() => onEndTimer() }
+                onComplete={() => onEndTimer()}
                 style={Styles.circleTimer}
                 size={300}
             >
@@ -211,13 +248,13 @@ export const AlarmController = ({
         </View>
         <View style={Styles.buttonArea}>
             <Spacer size={40} />
-            {buttonList.map((button) => (
-                <View>
+            {buttonList.map(button => (
+                <View key={button.index} >
                     <Button
                         key={button.index}
                         style={Styles.button}
                         title={button.name}
-                        onPress={onNodeButtonPress(button.index)}
+                        onPress={() => onNodeButtonPress(button)}
                     />
                     <Spacer size={15} />
                 </View>
@@ -242,7 +279,7 @@ export const AlarmController = ({
                         style={Styles.button}
                         title={playerState.playing ? "タイマーを一時停止" : "タイマーを再開"}
                         color="darkgreen"
-                        onPress={togglePlayState}
+                        onPress={() => setTimer(setPlayerState(playerState.duration, !playerState.playing))}
                         disabled={!controlState.pausable}
                     />
                     <Spacer size={15} />

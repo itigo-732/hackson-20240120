@@ -38,15 +38,15 @@ export const ForLoop = ({
     };
 }
 
-export const ButtonSwitch = ({
+export const ButtonSwitchNode = ({
     nextIndex = -1,
-    switchIndexList,
+    switchIndexList = [],
     autoStep = true,
     x = 0,
     y = 0,
 }) => {
     return {
-        "type": "buttonSwitch",
+        "type": "ButtonSwitchNode",
         switchIndexList,
         autoStep,
         nextIndex,
@@ -71,13 +71,28 @@ export const EndNode = ({
     return {"type": "endNode"};
 }
 
-export const SButton = ({
+export const AlertNode = ({
+    text = '',
+}) => {
+    return {
+        "type": "alertNode",
+        text,
+    }
+}
+
+
+// internal component
+
+export const UserButtonNode = ({
     name,
     color,
-    toIndex,
+    nextIndex = -1,
 }) => {
-    return {name, color, toIndex};
+    return {name, color, nextIndex};
 }
+
+
+// utilities
 
 export const Indexer = (array, setNextIndexAuto = true) => {
     let res = [];
@@ -95,26 +110,44 @@ export const Indexer = (array, setNextIndexAuto = true) => {
     return res;
 }
 
-const dj = [
+dj = [
 {"type": "standardTimer", "duration": 30, "autoStep": true, "pausable": true, "skippable": true, "nextIndex": 1 },
 {"type": "forLoop", "loopNumber": 5, "loopStartIndex": 2, "nextIndex": 5 },
-{"type": "buttonSwitch", "autoStep": false, "switchIndexList": [{"name":"赤", "color":"red", "toIndex":3},{"name":"青", "color":"blue", "toIndex": 4}]},
+{"type": "ButtonSwitchNode", "autoStep": false, "switchIndexList": [{"name":"赤", "color":"red", "toIndex":3},{"name":"青", "color":"blue", "toIndex": 4}]},
 {"type": "dummyNode", "nextIndex": 4},
 {"type": "dummyNode", "nextIndex": 1},
 {"type": "endNode" }
 ]
 // ↓ 等価
-export const dj2 = Indexer([
-    StandardTimer({duration: 30}),
+const dj2 = Indexer([
+    StandardTimer({duration: 5}),
     ForLoop({nextIndex: 5, loopNumber: 5, loopStartIndex: 2}),
-    ButtonSwitch({
+    ButtonSwitchNode({
         autoStep: false,
-        switchIndexList: [
-            SButton({toIndex: 3, name: "赤", color: "red"}),
-            SButton({toIndex: 4, name: "青", color: "blue"}),
-        ]
+        switchIndexList: Indexer([
+            UserButtonNode({toIndex: 3, name: "赤", color: "red"}),
+            UserButtonNode({toIndex: 4, name: "青", color: "blue"}),
+        ])
     }),
     DummyNode({}),
     DummyNode({nextIndex: 1}),
     EndNode({}),
+]);
+// ↓ 改善
+export const dj3 = Indexer([
+    StandardTimer({duration: 5}), // 0
+    ForLoop({nextIndex: 5, loopNumber: 5, loopStartIndex: 2}), // 1
+    ButtonSwitchNode({ // 2
+        autoStep: false,
+        switchIndexList: [3,4],
+    }),
+    UserButtonNode({nextIndex: 5, name: "赤", color: "red"}), // 3
+    UserButtonNode({nextIndex: 8, name: "青", color: "blue"}), // 4
+    DummyNode({}), // 5
+    StandardTimer({duration: 5}), // 6
+    DummyNode({nextIndex: 1}), // 7
+    DummyNode({}), // 8
+    StandardTimer({duration: 5}), // 9
+    DummyNode({nextIndex: 1}), // 10
+    EndNode({}), // 11
 ]);

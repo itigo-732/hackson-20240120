@@ -1,3 +1,43 @@
+import {
+    StandardTimer,
+    ForLoop,
+    ButtonSwitchNode,
+    DummyNode,
+    EndNode,
+} from './Node';
+
+export const parseLines = (text: string) => {
+    return text.split("\n")
+        .map(line => parseLine(line))
+        .filter(Boolean);
+}
+
+export const parseLine = (line: string) => {
+    const tokens = line.split(' ');
+    const op = tokens.shift();
+    const args = Object.fromEntries(
+        tokens
+            .map(a => a.split('='))
+            .map(d => d.length == 1 ? [d[0], "true"] : d)
+    );
+    console.log('[parseLine] line: ' + JSON.stringify(args));
+
+    // 空白行
+    if(op === undefined)
+        return false;
+
+    // コメント
+    if(line.startsWith('#') || line.startsWith('//'))
+        return false;
+
+    // timer => standardTimer
+    if(op == 'timer') {
+        return StandardTimer(args);
+    }
+}
+
+const dt = "timer duration=300, autoStep="
+
 import { AlarmButton } from '../Alarm/AlarmButton';
 
 type jsonNodeType = {
@@ -42,7 +82,7 @@ export class FlowChartNode{
     public loopNumber: int;
     public loopIndexList: int[];
 
-    // buttonSwitch type attr
+    // ButtonSwitchNode type attr
     public switchIndexList: switchIndexListType;
 
     constructor(i: int, jsonNode: jsonNodeType) {
