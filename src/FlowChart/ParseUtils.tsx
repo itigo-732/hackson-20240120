@@ -22,7 +22,7 @@ const parseLine = (line: string) => {
             .map(a => a.split('='))
             .map(d => d.length == 1 ? [d[0], "true"] : d)
     );
-    console.log('[parseLine] op: ' + op + ' => ' + JSON.stringify(args));
+    console.debug('[parseLine] op: ' + op + ' => ' + JSON.stringify(args));
 
     // 空白行
     if(op === undefined)
@@ -62,16 +62,18 @@ const parseLine = (line: string) => {
 export const convertNodes = (nodes, formatMode = true) => {
     return nodes
         .map(node => convertNode(node, formatMode))
-        .map(line => formatMode ? [line, ''] : line)
-        .flat()
-        .join('\n');
+//        .map(line => formatMode ? [line, ''] : line)
+//        .flat()
+        .join(formatMode ? '\n\n': '\n');
 }
 
 const convertNode = (node, formatMode) => {
     const args = Object.entries(node)
     const argsText = (formatMode ? '\n' : '') + args
-//        .filter(arg => !(formatMode && ['x', 'y'].includes(arg[0])))
-        .map(arg => arg[0] == 'type' ? false : arg[0] + "=" + arg[1])
+        .filter(arg => !(formatMode && ['x', 'y', 'key', 'index'].includes(arg[0])))
+        .filter(arg => !(formatMode && [0, false].includes(arg[1])))
+        .filter(arg => arg[0] !== 'type')
+        .map(arg => arg[1] === true ? arg[0] : arg[0] + "=" + arg[1])
         .filter(Boolean)
         .map(argText => formatMode ? '    ' + argText : argText)
         .join(formatMode ? '\n' : ' ');

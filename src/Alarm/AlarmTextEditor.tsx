@@ -18,6 +18,7 @@ import { Header as HeaderRNE, HeaderProps, Icon } from '@rneui/themed';
 import { Image } from 'react-native-elements';
 import { loadTimerLogic, saveTimerLogic } from '../Storage/AlarmManager';
 import { parseLines, convertNodes } from '../FlowChart/ParseUtils';
+import { Indexer } from '../FlowChart/Node';
 
 import { Spacer } from './Spacer';
 import { styles } from '../Style';
@@ -33,18 +34,36 @@ export const AlarmTextEditor = ({
     route,
 }: AlarmProp) => {
     const [codeText, setCodeText] = useState();
+    const [codeChanged, setCodeChanged] = useState(false);
 
     const onChangeText = (text) => {
-        setCodeText(text)
+        setCodeText(text);
+        setCodeChanged(true);
     }
 
     const onBackButtonPress = () => {
-        navigation.navigate("TimerList");
+//        console.log(codeChanged);
+        if(codeChanged)
+            Alert.alert(
+                '警告',
+                '変更が保存されていません\n保存しますか？',
+                [
+                    {text: 'キャンセル', onPress: () => {}},
+                    {text: '保存', onPress: async () => {
+                        await saveTimerLogic(route.params.timerName, Indexer(parseLines(codeText)));
+                        navigation.navigate("TimerList");
+                    }},
+                    {text: '破棄', onPress: () => navigation.navigate("TimerList")},
+                ]
+            );
+        else
+            navigation.navigate("TimerList");
     }
 
     const onSaveButtonPress = async () => {
         console.log(parseLines(codeText));
-        await saveTimerLogic(route.params.timerName, parseLines(codeText));
+        await saveTimerLogic(route.params.timerName, Indexer(parseLines(codeText)));
+        setCodeChanged(false);
         Alert.alert('保存しました');
     }
 

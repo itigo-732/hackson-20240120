@@ -13,10 +13,13 @@ import {
 import Constants from 'expo-constants';
 import { CountdownCircleTimer } from 'react-native-countdown-circle-timer';
 import { loadTimerLogic, saveTimerLogic } from '../Storage/AlarmManager';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { Header as HeaderRNE, HeaderProps, Icon } from '@rneui/themed';
 
 import { AlarmButton } from './AlarmButton';
 import { Spacer } from './Spacer';
 import { Styles } from './Styles';
+import { styles } from '../Style';
 
 import { dummyJson } from '../FlowChart/Test';
 import {
@@ -51,6 +54,8 @@ export const AlarmController = ({
         duration: 0,
     });
 
+    const [showTimeRemains, setShowTimeRemains] = useState(true);
+
 //    let onTimerComplete = () => {};
 //    const [initialized, setInitialized] = useState(false);
     // 初期化完了までロック
@@ -75,6 +80,12 @@ export const AlarmController = ({
 
     const [clockKey, setClockKey] = useState(0);
     const [buttonList, setButtonList] = useState([]);
+
+    // header function
+
+    const onBackButtonPress = () => {
+        navigation.navigate('TimerList');
+    }
 
     // trigger function
     // タイマー終了時のアラート
@@ -166,6 +177,8 @@ export const AlarmController = ({
         // endNode
         if(nodeState.type == "endNode") {
             setNodeMutex(true);
+            setShowTimeRemains(false);
+            Alert.alert('timer ended!');
             return;
         }
 
@@ -192,7 +205,7 @@ export const AlarmController = ({
         }
 
         // ButtonSwitchNode
-        if(nodeState.type == "ButtonSwitchNode") {
+        if(nodeState.type == "buttonSwitchNode") {
             let bList = [];
             console.log(nodeState);
             for(let i=0; i<nodeState.switchIndexList.length; i++) {
@@ -220,25 +233,52 @@ export const AlarmController = ({
     }, [nodeState, nodeList]);
 
     return (
-        <View style={Styles.safeAreaContainer} >
-        <Spacer size={50} />
-        <View style={Styles.counter}>
-            <Text style={Styles.timerName}>
-                {route.params.timerName}
-            </Text>
-            <Spacer size={14} />
-            <CountdownCircleTimer
-                key={clockKey}
-                isPlaying={playerState.playing}
-                duration={playerState.duration}
-                colors={["#004777", "#F7B801", "#A30000"]}
-                onComplete={() => onEndTimer()}
-                style={Styles.circleTimer}
-                size={300}
-            >
+        <View style={Styles.container} >
+            <HeaderRNE
+                //style={}がなぜか適用されないので直接色指定
+                backgroundColor='#91CCF2'
+                leftComponent={
+                    <TouchableOpacity
+                        onPress={() => onBackButtonPress()}
+                    >
+                        <Text style={styles.headerButtonText}>
+                            ＜ 戻る
+                        </Text>
+                    </TouchableOpacity>
+                }
+
+                rightComponent={
+                    <TouchableOpacity
+                        /*-------------------------------------------------------------------------------------------------------
+                        タイマー新規作成の処理を書く
+                        -------------------------------------------------------------------------------------------------------*/
+                        onPress={() => onSaveButtonPress()}>
+
+                        <Text style={styles.rightHeaderButtonText}>
+                            リセット
+                        </Text>
+                    </TouchableOpacity>
+                }
+            />
+            <Spacer size={10} />
+            <View style={Styles.counter}>
+                <Text style={Styles.timerName}>
+                    {route.params.timerName}
+                </Text>
+                <Spacer size={14} />
+                <CountdownCircleTimer
+                    key={clockKey}
+                    isPlaying={playerState.playing}
+                    duration={playerState.duration}
+                    colors={["#004777", "#F7B801", "#A30000"]}
+                    onComplete={() => onEndTimer()}
+                    style={Styles.circleTimer}
+                    size={300}
+                >
                 {(info) => {    // 「※1 childrenについて」にて補足
                     const { remainingTime, animatedColor } = info // animatedColorはTimePropsに存在しないが取得可能
                     //this.beforeAlert(remainingTime)
+                    if(showTimeRemains)
                     return (
                         <View style={{ alignItems: 'center' }}>
                             <Text style={{...Styles.countDownText, ...Styles.baseTextColor}}>残り時間</Text>
@@ -253,7 +293,13 @@ export const AlarmController = ({
                                 <Text style={{...Styles.countDownText, ...Styles.baseTextColor}}>秒</Text>
                             </View>
                         </View>
-                    )
+                    );
+                    else
+                    return (
+                        <View style={{ alignItems: 'center' }}>
+                            <Text style={{...Styles.countDownText, ...Styles.baseTextColor}}>残り時間</Text>
+                        </View>
+                    );
                 } }
             </CountdownCircleTimer>
         </View>
@@ -283,7 +329,6 @@ export const AlarmController = ({
                     <Spacer size={15} />
                 </View>
 
-
                 <View>
                     <Button
                         key="102"
@@ -293,20 +338,9 @@ export const AlarmController = ({
                         onPress={() => setTimer(setPlayerState(playerState.duration, !playerState.playing))}
                         disabled={!controlState.pausable}
                     />
-                    <Spacer size={15} />
+                    <Spacer size={30} />
                 </View>
-
-            <View>
-                <Button
-                    key="101"
-                    style={Styles.button}
-                    title="終了する"
-                    color="red"
-                    onPress={() => onExit()}
-                />
-                <Spacer size={30} />
             </View>
-        </View>
         </View>
     );
 };

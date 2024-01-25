@@ -158,7 +158,7 @@ export const Indexer = (array, setNextIndexAuto = true) => {
 dj = [
 {"type": "standardTimer", "duration": 30, "autoStep": true, "pausable": true, "skippable": true, "nextIndex": 1 },
 {"type": "forLoop", "loopNumber": 5, "loopStartIndex": 2, "nextIndex": 5 },
-{"type": "ButtonSwitchNode", "autoStep": false, "switchIndexList": [{"name":"赤", "color":"red", "toIndex":3},{"name":"青", "color":"blue", "toIndex": 4}]},
+{"type": "buttonSwitchNode", "autoStep": false, "switchIndexList": [{"name":"赤", "color":"red", "toIndex":3},{"name":"青", "color":"blue", "toIndex": 4}]},
 {"type": "dummyNode", "nextIndex": 4},
 {"type": "dummyNode", "nextIndex": 1},
 {"type": "endNode" }
