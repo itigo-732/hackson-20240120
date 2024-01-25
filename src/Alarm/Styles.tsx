@@ -1,11 +1,21 @@
-import {View, TouchableNativeFeedback, Text, StyleSheet} from 'react-native';
+import { View, TouchableNativeFeedback, Text, StyleSheet, Platform, StatusBar } from 'react-native';
 
 export const Styles = StyleSheet.create({
+    baseTextColor: {
+        color: "black",
+    },
+
     container: {
-//         alignItems: 'center',
         flex: 1,
         flexDirection: 'column',
         marginHorizontal: 16,
+    },
+
+    safeAreaContainer: {
+        flex: 1,
+        flexDirection: 'column',
+//        marginHorizontal: 16,
+        paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     },
 
     timerName: {
@@ -43,6 +53,9 @@ export const Styles = StyleSheet.create({
     circleTimer: {
         flexDirection: 'row',
         alignItems: 'center',
-    }
+    },
+
+    // editor
+
 
 });

@@ -14,6 +14,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import EditScreen from './src/EditScreen';
 import TimerList from './src/TimerList';
 import AlarmController from './src/Alarm/AlarmController';
+import AlarmTextEditor from './src/Alarm/AlarmTextEditor';
 
 const Stack = createStackNavigator();
 
@@ -35,6 +36,10 @@ const Home = props => {
         <Stack.Screen
            name="AlarmScreen"
            component={AlarmController}
+        />
+        <Stack.Screen
+           name="AlarmTextEditScreen"
+           component={AlarmTextEditor}
         />
       </Stack.Navigator>
     </NavigationContainer>
