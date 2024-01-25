@@ -26,22 +26,19 @@ import {
     DummyNode,
     EndNode,
     UserButtonNode,
+    InitializeNode,
     dj3,
 } from '../FlowChart/Node';
 import { parseLines } from '../FlowChart/ParseUtils';
 
 type AlarmProp = PropsWithChildren<{
-    duration: int,
-    skippable: bool,
-    pausable: bool,
-    buttonList: AlarmButton[],
 }>;
 
 export const AlarmController = ({
-        children,
-        navigation,
-        route,
-    }: AlarmProp) => {
+    children,
+    navigation,
+    route,
+}: AlarmProp) => {
 
     // state object
     const [controlState, setControlState] = useState({
@@ -51,13 +48,13 @@ export const AlarmController = ({
 
     const [playerState, setPlayerState] = useState({
         playing: false,
-        duration: 2,
+        duration: 0,
     });
 
-    let onTimerComplete = () => {};
+//    let onTimerComplete = () => {};
 //    const [initialized, setInitialized] = useState(false);
     // 初期化完了までロック
-    const [nodeMutex, setNodeMutex] = useState(true);
+    const [nodeMutex, setNodeMutex] = useState(false);
     const sleep = msec => new Promise(r => setTimeout(r, msec));
 //    const awaitUntilInit = () => new Promise(async (resolve) => {
 //        while(!initialized) {
@@ -69,7 +66,12 @@ export const AlarmController = ({
 
 
     const [nodeList, setNodeList] = useState([]);
-    const [nodeState, setNodeState] = useState();
+//    let nodeListReplica = [];
+//    const setNodeList = list => {
+//        nodeListReplica = list
+//        setNodeListInternal(list);
+//    };
+    const [nodeState, setNodeState] = useState(InitializeNode({nextIndex: 0}));
 
     const [clockKey, setClockKey] = useState(0);
     const [buttonList, setButtonList] = useState([]);
@@ -134,18 +136,27 @@ export const AlarmController = ({
         if(nodeList.length > 0)
             setNodeState(nodeList[0]);
 //        console.log(JSON.stringify(data));
+        // 初期化時なぜかnodeListが空配列になる
+        // nodeListがuseEffectのdependenciesに入っていなかったから更新されなかった
         console.log('[App] nodeList loaded: ' + JSON.stringify(nodeList));
+//        console.log('[App] nodeListR loaded: ' + JSON.stringify(nodeListReplica));
         setNodeMutex(false);
-        forward();
     }
 
     // forward step
-    const forward = () => {
+    const forward = async () => {
 //        await awaitUntilInit();
 //        console.log('[App] init end');
         // Mutex設定時
         if(nodeMutex)
             return;
+
+        // 初回起動時
+        if(nodeState.type == "initializeNode") {
+//            setNodeState(nodeListReplica[nodeState.nextIndex]);
+            await initialize();
+            return;
+        }
 
         console.log('[App] node forward: ' + JSON.stringify(nodeState));
         // nodeState未設定時
@@ -198,18 +209,18 @@ export const AlarmController = ({
     }
 
     // 初期化時
-    useEffect(() => {
-        console.log('[App] nodeList initialized');
-        initialize();
-    }, []);
+//    useEffect(() => {
+////        console.log('[App] nodeList initialized');
+////        initialize();
+//    }, []);
 
-    // nodeState変更時
+    // 初期化、nodeState変更時
     useEffect(() => {
         forward();
-    }, [nodeState]);
+    }, [nodeState, nodeList]);
 
     return (
-        <View style={Styles.container} >
+        <View style={Styles.safeAreaContainer} >
         <Spacer size={50} />
         <View style={Styles.counter}>
             <Text style={Styles.timerName}>
@@ -230,16 +241,16 @@ export const AlarmController = ({
                     //this.beforeAlert(remainingTime)
                     return (
                         <View style={{ alignItems: 'center' }}>
-                            <Text style={Styles.countDownText}>残り時間</Text>
+                            <Text style={{...Styles.countDownText, ...Styles.baseTextColor}}>残り時間</Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Animated.Text style={{ color: animatedColor, ...Styles.countDownNumber }}>
+                                <Animated.Text style={{ color: animatedColor, ...Styles.countDownNumber, ...Styles.baseTextColor }}>
                                     {Math.floor((remainingTime % 3600) / 60)}
                                 </Animated.Text>
-                                <Text style={Styles.countDownText}>分</Text>
-                                <Animated.Text style={{ color: animatedColor, ...Styles.countDownNumber }}>
+                                <Text style={{...Styles.countDownText, ...Styles.baseTextColor}}>分</Text>
+                                <Animated.Text style={{ color: animatedColor, ...Styles.countDownNumber, ...Styles.baseTextColor }}>
                                     {remainingTime % 60}
                                 </Animated.Text>
-                                <Text style={Styles.countDownText}>秒</Text>
+                                <Text style={{...Styles.countDownText, ...Styles.baseTextColor}}>秒</Text>
                             </View>
                         </View>
                     )

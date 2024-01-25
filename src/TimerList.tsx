@@ -15,6 +15,7 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import storage from './Storage/Storage';
 import { addTimer, deleteTimerList } from './Storage/AlarmManager';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { styles } from './Style';
 
 // データをリセットする場合は↓の行をコメントアウト
 // AsyncStorage.removeItem('TimerNameList');
@@ -28,7 +29,8 @@ const TimerList = props => {
     };
 
     const onEditTimer = (item) => {
-        props.navigation.navigate('EditScreen', {message: item});
+//        props.navigation.navigate('EditScreen', {message: item});
+        props.navigation.navigate('AlarmTextEditScreen', {timerName: item});
     }
 
     const onExecTimer = (item) => {
@@ -82,11 +84,9 @@ const TimerList = props => {
                         タイマー新規作成の処理を書く
                         -------------------------------------------------------------------------------------------------------*/
                         onPress={() => onAddTimer()}>
-                        
-                        <Image
-                            style={styles.headerIcon}
-                            source={require('../img/PlusIcon.png')}
-                        />
+                        <Text style={styles.rightHeaderButtonText}>
+                            新規作成＋
+                        </Text>
                     </TouchableOpacity>
                 }
             />
@@ -140,7 +140,7 @@ const TimerList = props => {
 
 export default TimerList;
 
-const styles = StyleSheet.create({
+const stylesBak = StyleSheet.create({
     header: {
         backgroundColor: '#91CCF2', 
     },
